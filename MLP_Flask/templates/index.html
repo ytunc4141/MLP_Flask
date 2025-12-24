@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Fiyat Tahmin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+
+        body {
+
+            background-image: url("{{ url_for('static', filename='background.png') }}");
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            max-width: 550px;
+            
+            margin-left: 3%;
+            margin-right: auto;
+
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);          
+            -webkit-backdrop-filter: blur(20px);
+            
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            
+            color: #fff;
+        }
+        @media (max-width: 992px) {
+            .container {
+                margin: 20px auto;
+            }
+            body {
+                align-items: flex-start;
+            }
+        }
+
+        .form-label {
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        h2.text-primary {
+            color: #fff !important;
+            text-shadow: 0 0 15px rgba(13, 110, 253, 0.9);
+            margin-bottom: 30px;
+        }
+        
+        .btn-predict {
+            background: linear-gradient(45deg, #0d6efd, #0043a8);
+            border: none;
+            color: white;
+            width: 100%;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(13, 110, 253, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn-predict:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(13, 110, 253, 0.6);
+        }
+
+        .result-container {
+            margin-top: 25px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            padding-top: 20px;
+        }
+        
+        .price-box {
+            background: rgba(13, 110, 253, 0.25);
+            border: 1px solid rgba(13, 110, 253, 0.6);
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+        }
+
+        .list-group-item {
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+        }
+        
+        .text-secondary { color: #ddd !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="text-center">🖥️ PC Fiyat Hesaplama</h2>
+    
+    <form action="/predict" method="post">
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">İşlemci Markası</label>
+                <select name="Marka" class="form-select">
+                    <option value="0">AMD</option>
+                    <option value="1">Intel</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">İşlemci Modeli</label>
+                <select name="Islemci_Model" class="form-select">
+                    <option value="1">Giriş (i3 / Ryzen 3)</option>
+                    <option value="2">Orta (i5 / Ryzen 5)</option>
+                    <option value="3">Yüksek (i7 / Ryzen 7)</option>
+                    <option value="4">Ultra (i9 / Ryzen 9)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">RAM (GB)</label>
+                <input type="number" name="RAM_GB" class="form-control" placeholder="16" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">SSD (GB)</label>
+                <input type="number" name="SSD_GB" class="form-control" placeholder="512" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ekran Kartı</label>
+            <select name="Ekran_Karti" class="form-select">
+                <option value="1">Giriş (GTX 1650 vb.)</option>
+                <option value="2">Orta-Giriş (RTX 3050 / RX 6600)</option>
+                <option value="3">Orta (RTX 3060 / 4060)</option>
+                <option value="4">Yüksek (RTX 4070 / 3080)</option>
+                <option value="5">Ultra (RTX 4080 / 4090)</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ekran Kartı VRAM (GB)</label>
+            <input type="number" name="VRAM_GB" class="form-control" placeholder="8" required>
+        </div>
+
+        <button type="submit" class="btn btn-predict">FİYATI HESAPLA</button>
+    </form>
+
+    {% if prediction_text %}
+    <div class="result-container">
+        <div class="price-box">
+            {{ prediction_text }} TL
+        </div>
+        
+        <div class="details-list">
+            <h6 class="mb-3 text-secondary">Seçilen Sistem Özellikleri:</h6>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    İşlemci
+                    <span class="badge bg-primary rounded-pill">{{ details.marka }} - {{ details.islemci }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Bellek & Depolama
+                    <span class="badge bg-secondary rounded-pill">{{ details.ram }}GB RAM / {{ details.ssd }}GB SSD</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Ekran Kartı
+                    <span class="badge bg-danger rounded-pill">{{ details.gpu }}</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="text-center mt-3">
+            <a href="/" class="btn btn-outline-light btn-sm">Yeni Hesaplama</a>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if error_text %}
+    <div class="alert alert-danger mt-3">
+        {{ error_text }}
+    </div>
+    {% endif %}
+
+</div>
+
+</body>
+</html>
